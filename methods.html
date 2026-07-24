@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research Methods — Do Events Raise Prices?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="site-wrapper">
+  <header class="site-header">
+    <h1 class="site-title">DO EVENTS RAISE PRICES?</h1>
+    <nav class="site-nav">
+      <a href="index.html">[ ] Home</a>
+      <a href="methods.html">[*] Research Methods</a>
+    </nav>
+  </header>
+
+  <!-- Typed in Obsidian, converted with https://markdowntotext.com/ -->
+  <main class="content">
+    <div class="methods-column">
+      <!-- <h1>Methodology</h1> -->
+        <h2>Research question</h2>
+        <p>Higher demand often means higher prices. Given that entertainment events like for example concerts cause an influx of visitors to the location, it is not unreasonable to assume that the short-term rent prices will increase as the date of the show approaches. We decided to test this hypothesis in our &quot;Events and Rents&quot; project.</p>
+        <h2>Data Collection</h2>
+        <h3>Location Data</h3>
+        <p>Each city was first converted into geographic coordinates using Nominatim, an open-source geocoding service based on OpenStreetMap data.</p>
+        <p>Using coordinates rather than only city names makes the event search more precise, especially for large metropolitan areas where relevant venues may lie outside the administrative boundaries of the city itself.</p>
+        <h3>Event Data</h3>
+        <p>Event information was collected from MusicBrainz, an open collaborative music database. Since the MusicBrainz API does not directly support searching for events within a geographic radius, we used a two-step workaround:</p>
+        <ol>
+        <li><strong>Find events in the broader area</strong><br> Search for events associated with the target city or region and within the requested date range.</li>
+        <li><strong>Filter by venue distance</strong><br> Retrieve the coordinates of each event venue, calculate the distance from the target location, and keep only events within the chosen radius (50 km default).</li>
+        </ol>
+        <p>This approach reduces irrelevant results while still capturing events in venues that belong functionally to a metropolitan area but are located outside its strict administrative boundaries.</p>
+        <pre><code class="language-python">
+        async def search_events_by_coords(session, latitude, longitude, radius_km, start_date, end_date, semaphore, *, area_hint):
+            raw_events = await search_events(session, area_hint, start_date, end_date, semaphore, skip_resolve=True)
+            # ...
+            for e in raw_events:
+            # ...
+                if place_lat is not None and place_lon is not None:
+                    dist = haversine_km(latitude, longitude, place_lat, place_lon)
+                    if dist &gt; radius_km:
+                        continue # venue too far — drop the event
+                results.append({...})
+        </code></pre>
+        <h3>Airbnb Data</h3>
+        <p>Historical Airbnb data was obtained from Inside Airbnb – a non-profit &quot;<em>...mission driven project that provides data and advocacy about Airbnb&#39;s impact on residential communities</em>&quot;, which publishes periodic snapshots containing information about listings, prices, availability, room types, and locations.</p>
+        <p>Unfortunately, only two last snapshots per city were accessible directly from the website. However, we discovered, that altering the date in the URL <em>might</em> yield an earlier snapshot. </p>
+        <p>Example: a known URL of a snapshot for New-York City for 2026-02-13.</p>
+        <pre><code>https://data.insideairbnb.com/united-states/ny/new-york-city/2026-02-13/data/listings.csv.gz
+        </code></pre>
+        <p>Turn it into a template:</p>
+        <pre><code>https://data.insideairbnb.com/united-states/ny/new-york-city/{}/data/listings.csv.gz
+        </code></pre>
+        <p>Try another date (this one actually exists):</p>
+        <pre><code>https://data.insideairbnb.com/united-states/ny/new-york-city/2025-12-04/data/listings.csv.gz
+        </code></pre>
+        <p>Because snapshots are published periodically rather than daily, an event date does not necessarily have a snapshot recorded on exactly the same day. Events were therefore grouped by city and month and matched to the nearest available Airbnb snapshot within the surrounding time window.</p>
+        <p>If available, snapshots before and after the matched snapshot were also identified. This provides additional temporal context and makes it possible to compare changes in the local Airbnb market over time rather than relying on a single observation.</p>
+        <p>The required snapshot files were then downloaded and stored for further processing.</p>
+        <h3>Optimisation</h3>
+        <p>To avoid rate limiting or potentially being mistaken for a DDoS attack, in <em>snapshot search</em>, <em>event search</em> and <em>snapshot download</em> stages the workload was split into a couple of docker containers, each connected to a different VPN server which allowed to have more IPs and to circumvent rate limiting (especially in the MusicBrainz case, which allows only 1 request per second). In the containers, the workload was split up further into asynchronous workers to speed up the process.</p>
+        <h2>Data Cleaning and Preparation</h2>
+        <p>The raw Inside Airbnb data is distributed across several datasets. In particular, listing-level and calendar-level information had to be combined before analysis.</p>
+        <p>The datasets were joined using the listing identifier, producing observations at the level of one Airbnb listing x one calendar date.</p>
+        <p>Price values were converted from formatted currency strings into numeric values. When several price fields were available, a fallback strategy was used to select the most appropriate valid price.</p>
+        <p>Rows without essential information (city, date, price and location information) were removed.</p>
+        <pre><code class="language-python">
+        drop_mask = missing_city | missing_date | missing_price | missing_address
+
+        if strict:
+            drop_mask = drop_mask | missing_coords
+        return df[~drop_mask].reset_index(drop=True), stats
+        </code></pre>
+        <pre><code class="language-python">
+        joined = calendar.merge(listings_side, left_on=&quot;listing_id&quot;, right_on=&quot;id&quot;, how=&quot;inner&quot;)
+
+        price = joined[&quot;adjusted_price&quot;].map(parse_price)
+        price = price.fillna(joined[&quot;price&quot;].map(parse_price))
+        price = price.fillna(joined[&quot;listings_price&quot;].map(parse_price))
+
+        joined[&quot;price&quot;] = price
+
+        has_neighbourhood = neighbourhood.notna() &amp; (neighbourhood.astype(str).str.strip() != &quot;&quot;)
+
+        address = neighbourhood.where(has_neighbourhood, joined[&quot;neighbourhood_cleansed&quot;])
+        </code></pre>
+        <pre><code class="language-python">
+        def parse_price(value) -&gt; float | None:
+            text = str(value).strip()
+            if not text or text.lower() == &quot;nan&quot;:
+                return None
+            text = text.replace(&quot;$&quot;, &quot;&quot;).replace(&quot;,&quot;, &quot;&quot;).strip()
+            try:
+                return float(text)
+            except ValueError:
+                return None
+        </code></pre>
+        <p>Because Airbnb snapshots can contain calendar dates far beyond the period relevant to the snapshot itself, observations were restricted to a defined lead-time window, using up to 60 days after the snapshot date.</p>
+        <p>When the same listing and calendar date appeared in multiple overlapping snapshots, duplicate observations were resolved so that each listing-date combination contributed only once to the final dataset.</p>
+        <pre><code class="language-python">
+        lead_days = (calendar[&quot;date&quot;] - scrape_ts).dt.days
+
+        calendar = calendar[(lead_days &gt;= 0) &amp; (lead_days &lt;= lead_window_days)]
+        </code></pre>
+        <pre><code class="language-python">
+        panel = panel.sort_values(&quot;lead_days&quot;).drop_duplicates(subset=[&quot;listing_id&quot;, &quot;date&quot;], keep=&quot;first&quot;)
+        </code></pre>
+        <h2>Data Analysis</h2>
+        <p>After cleaning, the data was aggregated by calendar date to describe daily changes in the Airbnb market.</p>
+        <h4>Metrics:</h4>
+        <p>·       <strong>Median price</strong> as the main measure of the typical nightly price.<br>·       <strong>Mean price</strong> as an additional reference measure.<br>·       <strong>25th and 75th price percentiles (IQR)</strong> to represent the spread of prices.<br>·       <strong>Number of listings</strong> observed on that date.<br>·       <strong>Number of available listings</strong> to describe changes in booking availability.</p>
+        <p>The median was used as the primary price indicator because Airbnb prices are typically right-skewed: a relatively small number of very expensive properties can strongly influence the arithmetic mean.</p>
+        <p>To distinguish event-related changes from normal short-term price variation, we also calculated a 30-day rolling median baseline based only on previous observations.</p>
+        <p><strong>Price change relative to baseline =<br>(daily median price − rolling baseline) / rolling baseline</strong></p>
+        <p>The rolling baseline is shifted by one day, meaning that the price observed on a given date does not contribute to its own baseline. This avoids artificially reducing or inflating the measured deviation.</p>
+        <p>A positive deviation around an event date indicates that accommodation prices were higher than their recent local baseline. Availability was analysed alongside prices as an additional indicator of demand: decreasing availability may indicate that listings are being booked as the event approaches.</p>
+        <pre><code class="language-python">
+        metrics = panel.groupby(&quot;date&quot;).agg(
+            median_price=(&quot;price&quot;, &quot;median&quot;),
+            mean_price=(&quot;price&quot;, &quot;mean&quot;),
+            p25_price=(&quot;price&quot;, lambda s: s.quantile(0.25)),
+            p75_price=(&quot;price&quot;, lambda s: s.quantile(0.75)),
+            n_listings=(&quot;price&quot;, &quot;count&quot;),
+            n_available=(&quot;available&quot;, lambda s: (s == &quot;t&quot;).sum()),
+        ).reset_index()
+          
+        metrics[&quot;rolling_baseline_median&quot;] = (
+            metrics[&quot;median_price&quot;].rolling(rolling_days, min_periods=1).median().shift(1)
+        )
+
+        metrics[&quot;pct_vs_baseline&quot;] = (
+            metrics[&quot;median_price&quot;] - metrics[&quot;rolling_baseline_median&quot;]
+        ) / metrics[&quot;rolling_baseline_median&quot;]
+
+        metrics[&quot;availability_rate&quot;] = metrics[&quot;n_available&quot;] / metrics[&quot;n_listings&quot;] * 100
+        </code></pre>
+        <h4>Detailed metric explanation:</h4>
+        <table>
+        <thead>
+        <tr>
+        <th>Metric</th>
+        <th>Meaning</th>
+        </tr>
+        </thead>
+        <tbody><tr>
+        <td><code>median_price</code></td>
+        <td>Median nightly price across all listings observed that day. Used as the primary series because nightly rental prices are right-skewed and a few very expensive listings would inflate a plain mean.</td>
+        </tr>
+        <tr>
+        <td><code>mean_price</code></td>
+        <td>Mean nightly price, plotted alongside the median for comparison.</td>
+        </tr>
+        <tr>
+        <td><code>p25_price</code> / <code>p75_price</code></td>
+        <td>25th/75th percentile price (interquartile range), drawn as a shaded band around the median to show the spread of prices, not just its center.</td>
+        </tr>
+        <tr>
+        <td><code>n_listings</code></td>
+        <td>Number of priced listings observed that date (sample size).</td>
+        </tr>
+        <tr>
+        <td><code>n_available</code></td>
+        <td>Number of those listings still marked bookable (<code>available == &quot;t&quot;</code>).</td>
+        </tr>
+        <tr>
+        <td><code>availability_rate</code></td>
+        <td><code>n_available / n_listings * 100</code> — the percentage of listings still available. A scarcity/demand proxy: falling availability near an event date suggests bookings are filling up.</td>
+        </tr>
+        <tr>
+        <td><code>rolling_baseline_median</code></td>
+        <td>A 30-day trailing rolling median of <code>median_price</code>, shifted by one day so a day&#39;s own price never contributes to its own baseline (avoids self-referential inflation).</td>
+        </tr>
+        <tr>
+        <td><code>pct_vs_baseline</code></td>
+        <td><code>(median_price - rolling_baseline_median) / rolling_baseline_median</code> — percentage deviation of a day&#39;s price from its own recent trailing baseline. This is the &quot;event price lift&quot; signal: a spike here around an event date suggests event-driven demand.</td>
+        </tr>
+        </tbody></table>
+        <h2>Visualization</h2>
+        <p>The processed data was visualized as interactive time-series plots.</p>
+        <p>The main price visualization combines:</p>
+        <ul>
+        <li>daily median price,</li>
+        <li>rolling baseline median</li>
+        <li>daily mean price,</li>
+        <li>the interquartile range (25th–75th percentile),</li>
+        <li>and vertical markers indicating event dates.</li>
+        </ul>
+        <p>A separate visualization shows the percentage of Airbnb listings that remained available over time, using the same event markers.</p>
+        <p>Displaying event dates directly on the price and availability timelines makes it possible to visually examine whether unusual changes occur shortly before, during, or after major local events.</p>
+        <h2>Pipeline Overview</h2>
+        <p><strong>City → Coordinates → Event Search → Airbnb Snapshot Matching → Download → Data Cleaning → Filtering → Analysis → Visualization</strong></p>
+        <p>This workflow allows event and accommodation data from different sources and time scales to be transformed into a consistent daily dataset that can be used to investigate whether local events coincide with changes in Airbnb prices and availability.</p>
+
+    </div>
+  </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,317 @@
+:root {
+  --color-bg: #ffffff;
+  --color-text: #000000;
+  --color-marker-text: #000000;
+  --color-marker-text-hover: #ffffff;
+  --color-marker-bg: #ffffff;
+  --color-marker-hover-bg: #000000;
+  --color-metric-a: #0e5dfb;
+  --color-metric-b: #f60f6e;
+  --content-width: 1024px;
+}
+
+@media (max-width: 2560px) {
+  :root { --content-width: 2560px; }
+}
+
+@media (max-width: 1920px) {
+  :root { --content-width: 1920px; }
+}
+
+@media (max-width: 1440px) {
+  :root { --content-width: 1440px; }
+}
+
+@media (max-width: 1280px) {
+  :root { --content-width: 1280px; }
+}
+
+@media (max-width: 1024px) {
+  :root { --content-width: 1024px; }
+}
+
+@media (max-width: 768px) {
+  :root { --content-width: 100%; }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 16px;
+  letter-spacing: 0.8px;
+  padding: 0 16px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.site-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 65%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+}
+
+/* Header ---------------------------------------------------------------- */
+
+.site-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  container-type: inline-size;
+}
+
+.site-title {
+  font-weight: 300;
+  font-size: clamp(24px, 6.7cqi, 94px);
+  letter-spacing: normal;
+  text-align: justify;
+  text-align-last: justify;
+  text-justify: inter-character;
+}
+
+.site-nav {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.site-nav a {
+  color: var(--color-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-nav a:hover {
+  text-decoration: underline;
+}
+
+/* Content column --------------------------------------------------------- */
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  width: 100%;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  width: 100%;
+  max-width: var(--content-width);
+}
+
+.page-heading {
+  font-weight: 400;
+  font-size: 48px;
+  letter-spacing: 2.4px;
+}
+
+/* Home map with clickable city labels ----------------------------------- */
+
+.map-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.map-wrap img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.city-marker {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: translateY(-50%);
+  color: var(--color-marker-text);
+  text-decoration: none;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.city-marker span {
+  background: var(--color-marker-bg);
+  padding: 2px 4px;
+  border:#000000 1px solid;
+}
+
+.city-marker span:hover {
+  background: var(--color-marker-hover-bg);
+  color: var(--color-marker-text-hover);
+}
+
+.city-marker::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-text);
+  flex-shrink: 0;
+}
+
+.city-marker:hover {
+  text-decoration: underline;
+}
+
+.city-marker.label-left {
+  flex-direction: row-reverse;
+  transform: translate(-100%, -50%);
+}
+
+.marker-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.marker-lines line {
+  stroke: var(--color-text);
+  stroke-width: 1.5;
+  opacity: 0.5;
+}
+
+.city-dot {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-text);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.city-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  color: var(--color-marker-text);
+  text-decoration: none;
+  font-size: 14px;
+  white-space: nowrap;
+  background: var(--color-marker-bg);
+  padding: 2px 4px;
+  border: #000000 1px solid;
+}
+
+.city-label:hover {
+  background: var(--color-marker-hover-bg);
+  color: var(--color-marker-text-hover);
+  text-decoration: underline;
+}
+
+/* City page --------------------------------------------------------------- */
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.back-link img {
+  width: 24px;
+  height: 24px;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.charts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 64px;
+  width: 100%;
+}
+
+.graph {
+  width: 100%;
+  max-width: var(--content-width);
+  aspect-ratio: 1024 / 547;
+  border: none;
+}
+
+/* Research methods page ---------------------------------------------------- */
+
+.methods-column {
+  display: flex;
+  flex-direction: column;
+  gap: 27px;
+  width: 100%;
+  /* max-width: 1037px; */
+}
+
+.methods-column table {
+  width: 100%;
+  border-collapse: collapse; 
+}
+
+.methods-column th, .methods-column td {
+  border: 1px solid #000000;
+  padding: 8px;
+  text-align: left;
+}
+
+.methods-column p, .methods-column li, .methods-column tr {
+  font-family: "IBM Plex Sans", sans-serif;
+}
+
+h1 {
+  font-weight: 300;
+  font-size: clamp(64px, 4.5vw, 96px);
+  letter-spacing: 0.05em;
+}
+
+h2 {
+  font-weight: 300;
+  font-size: clamp(36px, 4.5vw, 64px);
+  letter-spacing: 0.05em;
+}
+
+h3 {
+  font-weight: 300;
+  font-size: clamp(24px, 4.5vw, 36px);
+  letter-spacing: 0.05em;
+}
+
+.methods-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.methods-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 63px;
+  width: 100%;
+  /* max-width: 729px; */
+}
+
+.methods-sections section {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+

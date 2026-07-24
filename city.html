@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>City — Do Events Raise Prices?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="site-wrapper">
+  <header class="site-header">
+    <h1 class="site-title">DO EVENTS RAISE PRICES?</h1>
+    <nav class="site-nav">
+      <a href="index.html">[*] Home</a>
+      <a href="methods.html">[ ] Research Methods</a>
+    </nav>
+  </header>
+
+  <main class="content">
+    <div class="column">
+      <a class="back-link" href="index.html">
+        <img src="assets/arrow-left.svg" alt="">
+        Back to the map
+      </a>
+    </div>
+    <div class="column">
+      <h2 class="page-heading" id="city-name">""</h2>
+      <p id="city-description">Pink vertical dashed lines represent events: hover over them to see details. The graph data is limited by the availability and quantity of listings- and events-related information for the city.</p>
+    </div>
+    <div class="charts">
+      <iframe class="graph" id="graph-price" title="Price vs events"></iframe>
+      <iframe class="graph" id="graph-availability" title="Availability vs events"></iframe>
+      <p id="graphs-placeholder" hidden>Graphs for this city are coming soon.</p>
+    </div>
+  </main>
+  </div>
+  <script src="js/city-data.js"></script>
+  <script src="js/cities.js"></script>
+</body>
+</html>

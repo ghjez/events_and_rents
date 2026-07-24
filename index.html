@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Do Events Raise Prices?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="site-wrapper">
+  <header class="site-header">
+    <h1 class="site-title">DO EVENTS RAISE PRICES?</h1>
+    <nav class="site-nav">
+      <a href="index.html">[*] Home</a>
+      <a href="methods.html">[ ] Research Methods</a>
+    </nav>
+  </header>
+
+  <main class="content">
+    <div class="column">
+      <h2 class="page-heading">Choose a city</h2>
+      <p>Click on the label to view price and availability graphs for the city.</p>
+      <div class="map-wrap">
+        <img src="assets/graphs/map2.svg" alt="World map">
+        <a class="city-marker" style="left: 6%; top: 33%" href="city.html?city=los-angeles"><span>Los Angeles</span></a>
+        <a class="city-marker" style="left: 19%; top: 29%" href="city.html?city=new-york"><span>New York</span></a>
+        <a class="city-marker" style="left: 25.5%; top: 81%" href="city.html?city=buenos-aires"><span>Buenos Aires</span></a>
+        <a class="city-marker" style="left: 71.5%; top: 48.5%" href="city.html?city=bangkok"><span>Bangkok</span></a>
+        <a class="city-marker" style="left: 81%; top: 31.5%" href="city.html?city=tokyo"><span>Tokyo</span></a>
+        <a class="city-marker label-left" style="left: 86%; top: 80%" href="city.html?city=sydney"><span>Sydney</span></a>
+        
+        <svg class="marker-lines" viewBox="0 0 1601 740" preserveAspectRatio="none" aria-hidden="true">
+          <line x1="384.7" y1="51.9" x2="661.2" y2="155.4" />
+          <line x1="609.0" y1="51.9" x2="672.4" y2="173.9" />
+          <line x1="833.4" y1="51.9" x2="680.4" y2="151.7" />
+          <line x1="1057.8" y1="51.9" x2="712.4" y2="155.4" />
+        </svg>
+        <span class="city-dot" style="left: 41.3%; top: 21%"></span>
+        <span class="city-dot" style="left: 42%; top: 23.5%"></span>
+        <span class="city-dot" style="left: 42.5%; top: 20.5%"></span>
+        <span class="city-dot" style="left: 44.5%; top: 21%"></span>
+        <a class="city-label" style="left: 24%; top: 7%" href="city.html?city=london">London</a>
+        <a class="city-label" style="left: 38%; top: 7%" href="city.html?city=paris">Paris</a>
+        <a class="city-label" style="left: 52%; top: 7%" href="city.html?city=amsterdam">Amsterdam</a>
+        <a class="city-label" style="left: 66%; top: 7%" href="city.html?city=berlin">Berlin</a>
+      </div>
+    </div>
+  </main>
+  </div> 
+</body>
+</html>
