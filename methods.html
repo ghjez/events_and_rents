@@ -27,10 +27,10 @@
         <p>Higher demand often means higher prices. Given that entertainment events like for example concerts cause an influx of visitors to the location, it is not unreasonable to assume that the short-term rent prices will increase as the date of the show approaches. We decided to test this hypothesis in our &quot;Events and Rents&quot; project.</p>
         <h2>Data Collection</h2>
         <h3>Location Data</h3>
-        <p>Each city was first converted into geographic coordinates using Nominatim, an open-source geocoding service based on OpenStreetMap data.</p>
+        <p>Each city was first converted into geographic coordinates using <a href="https://nominatim.org/">Nominatim</a>, an open-source geocoding service based on OpenStreetMap data.</p>
         <p>Using coordinates rather than only city names makes the event search more precise, especially for large metropolitan areas where relevant venues may lie outside the administrative boundaries of the city itself.</p>
         <h3>Event Data</h3>
-        <p>Event information was collected from MusicBrainz, an open collaborative music database. Since the MusicBrainz API does not directly support searching for events within a geographic radius, we used a two-step workaround:</p>
+        <p>Event information was collected from <a href="https://musicbrainz.org/">MusicBrainz</a>, an open collaborative music database. Since the MusicBrainz API does not directly support searching for events within a geographic radius, we used a two-step workaround:</p>
         <ol>
         <li><strong>Find events in the broader area</strong><br> Search for events associated with the target city or region and within the requested date range.</li>
         <li><strong>Filter by venue distance</strong><br> Retrieve the coordinates of each event venue, calculate the distance from the target location, and keep only events within the chosen radius (50 km default).</li>
@@ -49,7 +49,7 @@
                 results.append({...})
         </code></pre>
         <h3>Airbnb Data</h3>
-        <p>Historical Airbnb data was obtained from Inside Airbnb – a non-profit &quot;<em>...mission driven project that provides data and advocacy about Airbnb&#39;s impact on residential communities</em>&quot;, which publishes periodic snapshots containing information about listings, prices, availability, room types, and locations.</p>
+        <p>Historical Airbnb data was obtained from <a href="http://insideairbnb.com">Inside Airbnb</a> – a non-profit &quot;<em>...mission driven project that provides data and advocacy about Airbnb&#39;s impact on residential communities</em>&quot;, which publishes periodic snapshots containing information about listings, prices, availability, room types, and locations.</p>
         <p>Unfortunately, only two last snapshots per city were accessible directly from the website. However, we discovered, that altering the date in the URL <em>might</em> yield an earlier snapshot. </p>
         <p>Example: a known URL of a snapshot for New-York City for 2026-02-13.</p>
         <pre><code>https://data.insideairbnb.com/united-states/ny/new-york-city/2026-02-13/data/listings.csv.gz
