@@ -114,12 +114,14 @@
         <h2>Data Analysis</h2>
         <p>After cleaning, the data was aggregated by calendar date to describe daily changes in the Airbnb market.</p>
         <h4>Metrics:</h4>
-        <p>·       <strong>Median price</strong> as the main measure of the typical nightly price.<br>·       <strong>Mean price</strong> as an additional reference measure.<br>·       <strong>25th and 75th price percentiles (IQR)</strong> to represent the spread of prices.<br>·       <strong>Number of listings</strong> observed on that date.<br>·       <strong>Number of available listings</strong> to describe changes in booking availability.</p>
-        <p>The median was used as the primary price indicator because Airbnb prices are typically right-skewed: a relatively small number of very expensive properties can strongly influence the arithmetic mean.</p>
-        <p>To distinguish event-related changes from normal short-term price variation, we also calculated a 30-day rolling median baseline based only on previous observations.</p>
-        <p><strong>Price change relative to baseline =<br>(daily median price − rolling baseline) / rolling baseline</strong></p>
-        <p>The rolling baseline is shifted by one day, meaning that the price observed on a given date does not contribute to its own baseline. This avoids artificially reducing or inflating the measured deviation.</p>
-        <p>A positive deviation around an event date indicates that accommodation prices were higher than their recent local baseline. Availability was analysed alongside prices as an additional indicator of demand: decreasing availability may indicate that listings are being booked as the event approaches.</p>
+        <ul>
+        <li>·       <strong>Median price</strong> as the main measure of the typical nightly price.<br>·       <strong>Mean price</strong> as an additional reference measure.<br>·       <strong>25th and 75th price percentiles (IQR)</strong> to represent the spread of prices.<br>·       <strong>Number of listings</strong> observed on that date.<br>·       <strong>Number of available listings</strong> to describe changes in booking availability.</li>
+        <li>The median was used as the primary price indicator because Airbnb prices are typically right-skewed: a relatively small number of very expensive properties can strongly influence the arithmetic mean.</li>
+        <li>To distinguish event-related changes from normal short-term price variation, we also calculated a 30-day rolling median baseline based only on previous observations.</li>
+        <li><strong>Price change relative to baseline =<br>(daily median price − rolling baseline) / rolling baseline</strong></li>
+        <li>The rolling baseline is shifted by one day, meaning that the price observed on a given date does not contribute to its own baseline. This avoids artificially reducing or inflating the measured deviation.</li>
+        <li>A positive deviation around an event date indicates that accommodation prices were higher than their recent local baseline. Availability was analysed alongside prices as an additional indicator of demand: decreasing availability may indicate that listings are being booked as the event approaches.</li>
+      </ul>
         <pre><code class="language-python">
         metrics = panel.groupby(&quot;date&quot;).agg(
             median_price=(&quot;price&quot;, &quot;median&quot;),
